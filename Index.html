@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0620" />
+  <title>METRO RUSH 3D</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <script type="importmap">
+    { "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    } }
+  </script>
+</head>
+<body>
+  <div id="game"></div>
+
+  <div id="ui">
+    <!-- LOADING -->
+    <section class="screen center active" data-screen="loading"><div class="logo small"><span>METRO</span><span>RUSH 3D</span></div><p class="hint">Loading…</p></section>
+
+    <!-- MAIN MENU -->
+    <section class="screen menu" data-screen="menu">
+      <div class="panel">
+        <div class="logo"><span>METRO</span><span>RUSH 3D</span></div>
+        <div class="menu-stats">
+          <div><small>BEST</small><b id="menu-best">0</b></div>
+          <div><small>COINS</small><b id="menu-coins">0</b></div>
+          <div><small>LEVEL</small><b id="menu-level">1</b></div>
+        </div>
+        <button id="btn-play" class="btn primary">▶ PLAY</button>
+        <button id="btn-characters" class="btn">CHARACTERS</button>
+        <button id="btn-settings" class="btn">SETTINGS</button>
+        <button id="btn-howto" class="btn">HOW TO PLAY</button>
+      </div>
+    </section>
+
+    <!-- CHARACTER SELECT -->
+    <section class="screen center" data-screen="characters">
+      <div class="panel wide">
+        <h2>CHOOSE YOUR RUNNER</h2>
+        <p class="hint">Coins in bank: <b id="char-coins">0</b></p>
+        <div id="character-grid"></div>
+        <button id="btn-characters-back" class="btn">← BACK</button>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="screen center" data-screen="settings">
+      <div class="panel">
+        <h2>SETTINGS</h2>
+        <label class="row"><span>Sound</span><input type="checkbox" id="set-sound" /></label>
+        <label class="row"><span>Music volume</span><input type="range" id="set-music" min="0" max="1" step="0.05" /></label>
+        <label class="row"><span>Effects volume</span><input type="range" id="set-sfx" min="0" max="1" step="0.05" /></label>
+        <label class="row"><span>Graphics</span>
+          <select id="set-quality"><option value="high">High (bloom + shadows)</option><option value="low">Low (faster)</option></select></label>
+        <button id="btn-reset" class="btn danger">RESET PROGRESS</button>
+        <button id="btn-settings-back" class="btn">← BACK</button>
+      </div>
+    </section>
+
+    <!-- INSTRUCTIONS -->
+    <section class="screen center" data-screen="instructions">
+      <div class="panel wide">
+        <h2>HOW TO PLAY</h2>
+        <div class="howto">
+          <div><h3>Keyboard</h3><p><kbd>←</kbd><kbd>A</kbd> / <kbd>→</kbd><kbd>D</kbd> change lane<br><kbd>↑</kbd><kbd>W</kbd><kbd>Space</kbd> jump<br><kbd>↓</kbd><kbd>S</kbd> slide (in the air: dive)<br><kbd>P</kbd>/<kbd>Esc</kbd> pause · <kbd>M</kbd> mute</p></div>
+          <div><h3>Touch</h3><p>Swipe left / right to change lane, up to jump, down to slide.</p></div>
+          <div><h3>Obstacles</h3><p><b>Low barriers</b> → jump.<br><b>Overhead signs</b> → slide.<br><b>Roadblocks, equipment, trains</b> → change lane. Moving trains are faster!</p></div>
+          <div><h3>Power-ups</h3><p>🧲 Magnet pulls coins · ✖2 double score · 🚀 Jetpack flies over everything · 🛡 Shield survives one crash.</p></div>
+        </div>
+        <button id="btn-howto-back" class="btn">← BACK</button>
+      </div>
+    </section>
+
+    <!-- HUD -->
+    <section class="screen hud" data-screen="hud">
+      <div class="hud-left"><div id="hud-score">0</div><div id="hud-distance">0 m</div><div id="hud-mult" class="hidden">x2</div></div>
+      <div id="hud-powerups"></div>
+      <div class="hud-right">
+        <div id="hud-coins"><i class="coin"></i><span>0</span></div>
+        <button id="btn-hud-mute" class="icon-btn" aria-label="Mute">🔊</button>
+        <button id="btn-pause" class="icon-btn" aria-label="Pause">❚❚</button>
+      </div>
+    </section>
+
+    <!-- PAUSE -->
+    <section class="screen center dim" data-screen="pause">
+      <div class="panel"><h2>PAUSED</h2>
+        <button id="btn-resume" class="btn primary">▶ RESUME</button>
+        <button id="btn-restart-p" class="btn">RESTART</button>
+        <button id="btn-menu-p" class="btn">MAIN MENU</button></div>
+    </section>
+
+    <!-- GAME OVER -->
+    <section class="screen center dim" data-screen="gameover">
+      <div class="panel wide">
+        <h2>GAME OVER</h2>
+        <div id="go-newbest" class="badge hidden">★ NEW BEST ★</div>
+        <div class="go-grid">
+          <div><small>SCORE</small><b id="go-score">0</b></div>
+          <div><small>COINS</small><b id="go-coins">0</b></div>
+          <div><small>DISTANCE</small><b id="go-distance">0 m</b></div>
+          <div><small>BEST</small><b id="go-best">0</b></div>
+        </div>
+        <div class="xp"><div class="xp-top"><span>LEVEL <b id="go-level">1</b></span><span id="go-xptext"></span></div><div class="xp-bar"><i id="go-xpbar"></i></div></div>
+        <p id="go-reward" class="reward hidden"></p>
+        <p id="go-next" class="hint"></p>
+        <button id="btn-restart" class="btn primary">↻ PLAY AGAIN</button>
+        <button id="btn-menu" class="btn">MAIN MENU</button>
+      </div>
+    </section>
+
+    <div id="countdown" class="hidden"></div>
+    <div id="toast"></div>
+  </div>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>
